@@ -77,6 +77,10 @@ app.get('/documentation', (req, res) => {
   res.render('documentation');
 });
 
+app.get('/service', (req, res) => {
+  res.render('service');
+});
+
 app.get('/server-health', (req, res) => {
   res.send('Server is Up, and running');
 })
