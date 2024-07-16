@@ -11,7 +11,7 @@ import { protect, admin } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
 router.post('/', protect, admin, createDepartment);
-router.get('/', protect, getDepartments);
+router.get('/', getDepartments); //protect, 
 router.get('/:id', protect, getDepartmentById);
 router.put('/:id', protect, admin, updateDepartment);
 router.delete('/:id', protect, admin, deleteDepartment);

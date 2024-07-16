@@ -11,7 +11,7 @@ import { protect, admin } from '../middlewares/authMiddleware.js';  // Assuming 
 const router = express.Router();
 
 router.post('/', protect, admin, createDoctor);
-router.get('/', protect, getDoctors);
+router.get('/', getDoctors); //protect, 
 router.get('/:id', protect, getDoctorById);
 router.put('/:id', protect, admin, updateDoctor);
 router.delete('/:id', protect, admin, deleteDoctor);
