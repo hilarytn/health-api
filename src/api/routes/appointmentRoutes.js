@@ -15,7 +15,7 @@ import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/book', protect, bookAppointment);
+router.post('/book', protect, bookAppointment); //protect,
 router.get('/', protect, getAppointments);
 router.get('/:id', protect, getAppointmentById);
 router.put('/:id', protect, updateAppointment);

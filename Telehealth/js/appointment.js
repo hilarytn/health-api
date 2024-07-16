@@ -28,41 +28,38 @@ document.addEventListener('DOMContentLoaded', function () {
             data.forEach(doctor => {
               const option = document.createElement('option');
               option.value = doctor._id;
-              option.textContent = `${doctor.fullName} - ${doctor.specialization}`;
+              option.textContent = `${doctor.username} - ${doctor.specialization}`;
               doctorSelect.appendChild(option);
             });
           })
           .catch(error => console.error('Error fetching doctors:', error));
       }
     });
-  
+
     // Handle form submission
     appointmentForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-  
-      const formData = {
-        doctorId: doctorSelect.value,
-        departmentId: departmentSelect.value,
-        date: document.getElementById('date').value,
-        time: document.getElementById('time').value,
-        fullName: document.getElementById('name').value,
-        phoneNumber: document.getElementById('phone').value,
-        message: document.getElementById('message').value,
-      };
-  
+      event.preventDefault(); // Prevent default form submission
+
+      const formData = new FormData(appointmentForm);
+      const jsonData = {};
+      formData.forEach((value, key) => jsonData[key] = value);
+
+      const token = localStorage.getItem('token');
+
       fetch('/api/appointment/book', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `${token}`, // Include the token in the Authorization header
+          },
+          body: JSON.stringify(jsonData),
       })
-        .then(response => response.json())
-        .then(data => {
+      .then(response => response.json())
+      .then(data => {
           console.log('Appointment created:', data);
           // Redirect to confirmation page or display a success message
-          window.location.href = '/confirmation';
-        })
-        .catch(error => console.error('Error creating appointment:', error));
-    });
+          //window.location.href = '/confirmation';
+      })
+      .catch(error => console.error('Error creating appointment:', error));
   });
+})
