@@ -1,0 +1,1 @@
+mongodb+srv://okiki:okiki@healthapp.vymq9im.mongodb.net/?retryWrites=true&w=majority&appName=HealthApp
