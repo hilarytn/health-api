@@ -1,0 +1,68 @@
+document.addEventListener('DOMContentLoaded', function () {
+    const departmentSelect = document.getElementById('departmentSelect');
+    const doctorSelect = document.getElementById('doctorSelect');
+    const appointmentForm = document.getElementById('appointmentForm');
+  
+    // Fetch and populate departments
+    fetch('/api/department')
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(department => {
+          const option = document.createElement('option');
+          option.value = department._id;
+          option.textContent = department.name;
+          departmentSelect.appendChild(option);
+        });
+      })
+      .catch(error => console.error('Error fetching departments:', error));
+  
+    // Fetch and populate doctors based on selected department
+    departmentSelect.addEventListener('change', function () {
+      const departmentId = this.value;
+      doctorSelect.innerHTML = '<option value="">Select Doctors</option>'; // Clear previous options
+  
+      if (departmentId) {
+        fetch(`/api/doctor?department=${departmentId}`)
+          .then(response => response.json())
+          .then(data => {
+            data.forEach(doctor => {
+              const option = document.createElement('option');
+              option.value = doctor._id;
+              option.textContent = `${doctor.fullName} - ${doctor.specialization}`;
+              doctorSelect.appendChild(option);
+            });
+          })
+          .catch(error => console.error('Error fetching doctors:', error));
+      }
+    });
+  
+    // Handle form submission
+    appointmentForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+  
+      const formData = {
+        doctorId: doctorSelect.value,
+        departmentId: departmentSelect.value,
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        fullName: document.getElementById('name').value,
+        phoneNumber: document.getElementById('phone').value,
+        message: document.getElementById('message').value,
+      };
+  
+      fetch('/api/appointment/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Appointment created:', data);
+          // Redirect to confirmation page or display a success message
+          window.location.href = '/confirmation';
+        })
+        .catch(error => console.error('Error creating appointment:', error));
+    });
+  });

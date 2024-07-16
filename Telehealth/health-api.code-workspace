@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../../../health-api"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Telehealth web application"
+	}
+}
