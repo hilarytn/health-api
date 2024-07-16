@@ -18,9 +18,9 @@ const __dirname = dirname(__filename);
 const app = express();
 const port = 3000;
 
-app.set('views', join(__dirname, 'Telehealth'))
+app.set('views', join(__dirname, '', 'Telehealth'))
 app.set('view engine', 'ejs')
-app.use(express.static(join(__dirname, 'Telehealth')));
+app.use(express.static(join(__dirname, '', 'Telehealth')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use('/api/auth', authRoutes);
