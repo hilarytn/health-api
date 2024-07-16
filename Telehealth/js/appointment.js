@@ -56,9 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .then(response => response.json())
       .then(data => {
-          console.log('Appointment created:', data);
           // Redirect to confirmation page or display a success message
-          //window.location.href = '/confirmation';
+          window.location.href = '/confirmation';
       })
       .catch(error => console.error('Error creating appointment:', error));
   });
