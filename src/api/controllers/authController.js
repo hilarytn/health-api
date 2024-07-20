@@ -58,4 +58,9 @@ const authUser = async (req, res) => {
   }
 };
 
-export { registerUser, authUser };
+//Logout user and get token
+const logout = async (req, res) => {
+  res.status(200).json({ message: 'Logged out successfully' });
+};
+
+export { registerUser, authUser, logout };

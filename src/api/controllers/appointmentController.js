@@ -19,7 +19,6 @@ const bookAppointment = async (req, res) => {
 
   try {
     const savedAppointment = await appointment.save();
-    console.log(savedAppointment);
     res.status(201).json(savedAppointment);
   } catch (error) {
     res.status(400).json({ message: error.message });
