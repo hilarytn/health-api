@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username');
 
+    document.getElementById('spinner').style.display = 'block';
     // Fetch and display user info
     fetch('/api/user/profile', {
         headers: {
@@ -129,6 +130,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 })
+.catch(error => {
+    console.error('Error:', error);
+    // Hide the spinner if there's an error
+    document.getElementById('spinner').style.display = 'none';
+});
+
     // Fetch and display prescriptions
     fetch('/api/prescriptions', {
         headers: {
@@ -288,23 +295,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     .spinner {
-        display: none; /* Hidden by default */
-        position: absolute; /* Position relative to the parent container */
-        top: 50%; /* Center vertically */
-        left: 50%; /* Center horizontally */
-        transform: translate(-50%, -50%); /* Adjust position */
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        border-radius: 50%;
-        border-top: 4px solid #3498db;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-    }
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #e12454; 
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+    display: block;
+}
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+/* Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
     .appointment-card {
     margin-bottom: 20px;

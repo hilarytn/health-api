@@ -61,6 +61,10 @@ app.get('/contact', (req, res) => {
   res.render('contact');
 });
 
+app.get('/patient/dashboard', (req, res) => {
+  res.render('clone');
+});
+
 app.get('/department', (req, res) => {
   res.render('department');
 });
@@ -78,7 +82,7 @@ app.get('/documentation', (req, res) => {
 });
 
 app.get('/patient/dashboard', (req, res) => {
-  res.render('patient-dashboard');
+  res.render('clone');
 });
 
 app.get('/doctor/dashboard', (req, res) => {
