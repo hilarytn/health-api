@@ -169,6 +169,29 @@ const getDoctorsByDepartment = async (req, res) => {
   }
 };
 
+// Get all appointments of a specific doctor
+const getAppointmentsByDoctor = async (req, res) => {
+  try {
+      const doctorId = req.params.id; // Assuming the doctor's ID is available in the URL as a route parameter
+
+      // Fetch appointments for the doctor
+      const appointments = await Appointment.find({ doctor: doctorId })
+          .populate('department', 'name') // Populate department name
+          .populate('user', 'fullname email'); // Populate user details
+
+      // // Check if appointments exist
+      // if (!appointments || appointments.length === 0) {
+      //     return res.json({ message: 'No appointments found for this doctor' });
+      // }
+
+      res.status(200).json(appointments);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching appointments', error: error.message });
+  }
+};
+
+
+
 export {
   bookAppointment,
   getAppointments,
@@ -179,5 +202,6 @@ export {
   rescheduleAppointment,
   cancelAppointment,
   getDepartments,
-  getDoctorsByDepartment
+  getDoctorsByDepartment,
+  getAppointmentsByDoctor
 };

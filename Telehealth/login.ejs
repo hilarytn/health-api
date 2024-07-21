@@ -94,7 +94,12 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     .then(data => {
         if (data.token) {
             localStorage.setItem('token', data.token);
-            window.location.href = '/'; // Redirect to a dashboard or home page after login
+            localStorage.setItem('username', data.username);
+            localStorage.setItem('_id', data._id);
+            localStorage.setItem('role', data.role);
+
+            if (data.role == 'user') window.location.href = '/patient/dashboard';
+            else { window.location.href = '/doctor/dashboard';} // Redirect to a dashboard or home page after login
         } else {
             alert('Login failed: ' + (data.message || 'Unknown error'));
         }

@@ -1,6 +1,7 @@
 import Doctor from '../models/Doctor.js';
 import Department from '../models/Department.js';
 import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
 
 // Create a new doctor
 const createDoctor = async (req, res) => {
@@ -12,10 +13,23 @@ const createDoctor = async (req, res) => {
       return res.status(404).json({ message: 'Department not found' });
     }
 
+    const emailExists = await User.findOne({ email });
+    if (emailExists) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
+  
+    const usernameExists = await User.findOne({ username });
+    if (usernameExists) {
+      return res.status(400).json({ message: 'Username already exists' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const doctor = new Doctor({
       username,
       email,
-      password,
+      password: hashedPassword,
       specialization,
       department: departmentId,
       role: 'doctor',

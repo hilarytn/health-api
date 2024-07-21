@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor/Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="doctorDashboard">
+        <h1>Welcome</h1>
+
+        <section id="upcomingAppointments">
+            <h2>Upcoming Appointments</h2>
+            <div id="appointmentsContainer">
+                <!-- Appointments will be populated here -->
+            </div>
+            <div id="spinner" class="spinner"></div> <!-- Spinner placed outside appointments container -->
+        </section>
+        
+
+        <section id="managePrescriptions">
+            <h2>Manage Prescriptions</h2>
+            <form id="prescriptionForm">
+                <select id="patientSelect" class="form-control">
+                    <option value="">Select Patient</option>
+                    <!-- Populate with patients -->
+                </select>
+                <input type="text" id="medication" class="form-control" placeholder="Medication" />
+                <input type="text" id="dosage" class="form-control" placeholder="Dosage" />
+                <button type="submit" class="btn btn-main btn-round-full">Add Prescription</button>
+            </form>
+            <ul id="prescriptionsList">
+                <!-- Prescriptions will be populated here -->
+            </ul>
+        </section>
+
+        <section id="profile">
+            <h2>Profile Information</h2>
+            <p id="profileInfo"></p>
+            <button id="updateProfile" class="btn btn-main btn-round-full">Update Profile</button>
+        </section>
+
+        <section id="messages">
+            <h2>Messages</h2>
+            <ul id="messagesList">
+                <!-- Messages will be populated here -->
+            </ul>
+        </section>
+    </div>
+
+    <!-- Modal for rescheduling -->
+    <div id="rescheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2>Reschedule Appointment</h2>
+            <form id="rescheduleForm">
+                <label for="rescheduleDate">Date</label>
+                <input type="date" id="rescheduleDate" required>
+                <label for="rescheduleTime">Time</label>
+                <input type="time" id="rescheduleTime" required>
+                <button type="submit">Reschedule</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    const doctorId = localStorage.getItem('_id');
+    document.querySelector('h1').innerText = `Welcome, ${username}`;
+
+    // Fetch and display user info
+    fetch('/api/user/profile', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.querySelector('h1').innerText = `Welcome, ${username}`;
+    });
+
+    // Show the spinner before starting the fetch request
+document.getElementById('spinner').style.display = 'block';
+
+// Fetch and display appointments
+fetch(`/api/appointment/doctor/${doctorId}`, {
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
+})
+.then(response => response.json())
+.then(appointments => {
+    const appointmentsContainer = document.getElementById('appointmentsContainer');
+    appointmentsContainer.innerHTML = '';
+
+    // Hide the spinner after data is fetched
+    document.getElementById('spinner').style.display = 'none';
+
+    if (appointments.length === 0) {
+        appointmentsContainer.innerHTML = '<p>No upcoming appointments</p>';
+    } else {
+        appointments.forEach(appointment => {
+            const appointmentDiv = document.createElement('div');
+            appointmentDiv.className = 'appointment';
+            const date = new Date(appointment.date);
+            const formattedDate = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+            const time = new Date(`1970-01-01T${appointment.time}:00`); // Assuming appointment.time is in HH:MM format
+            const formattedTime = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            appointmentDiv.innerHTML = `
+                <p>Patient: ${appointment.fullname}</p>
+                <p>Date: ${formattedDate}</p>
+                <p>Time: ${formattedTime}</p>
+                <button class="btn btn-main btn-round-full" onclick="openRescheduleModal('${appointment._id}')">Reschedule</button>
+            `;
+            appointmentsContainer.appendChild(appointmentDiv);
+        });
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    // Hide the spinner if there's an error
+    document.getElementById('spinner').style.display = 'none';
+});
+
+    // Fetch and display prescriptions
+    fetch('/api/prescriptions', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(prescriptions => {
+        const prescriptionsList = document.getElementById('prescriptionsList');
+        prescriptionsList.innerHTML = '';
+        if (prescriptions.length === 0) {
+            prescriptionsList.innerHTML = '<li>No prescriptions yet</li>';
+        } else {
+            prescriptions.forEach(prescription => {
+                const li = document.createElement('li');
+                li.innerText = `Patient: ${prescription.patient.username}, Medication: ${prescription.medication}, Dosage: ${prescription.dosage}`;
+                prescriptionsList.appendChild(li);
+            });
+        }
+    });
+
+    // Populate patient dropdown
+    fetch('/api/patients', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(patients => {
+        const patientSelect = document.getElementById('patientSelect');
+        patients.forEach(patient => {
+            const option = document.createElement('option');
+            option.value = patient._id;
+            option.innerText = patient.username;
+            patientSelect.appendChild(option);
+        });
+    });
+
+    // Handle prescription form submission
+    document.getElementById('prescriptionForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const patientId = document.getElementById('patientSelect').value;
+        const medication = document.getElementById('medication').value;
+        const dosage = document.getElementById('dosage').value;
+
+        fetch('/api/prescriptions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                patient: patientId,
+                medication: medication,
+                dosage: dosage
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Prescription added successfully');
+            // Refresh prescriptions list
+            fetch('/api/prescriptions', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(prescriptions => {
+                const prescriptionsList = document.getElementById('prescriptionsList');
+                prescriptionsList.innerHTML = '';
+                if (prescriptions.length === 0) {
+                    prescriptionsList.innerHTML = '<li>No prescriptions yet</li>';
+                } else {
+                    prescriptions.forEach(prescription => {
+                        const li = document.createElement('li');
+                        li.innerText = `Patient: ${prescription.patient.username}, Medication: ${prescription.medication}, Dosage: ${prescription.dosage}`;
+                        prescriptionsList.appendChild(li);
+                    });
+                }
+            });
+        });
+    });
+
+    // Reschedule appointment modal
+    window.openRescheduleModal = function(appointmentId) {
+        const modal = document.getElementById('rescheduleModal');
+        modal.style.display = 'block';
+        document.getElementById('rescheduleForm').onsubmit = function(event) {
+            event.preventDefault();
+            const newDate = document.getElementById('rescheduleDate').value;
+            const newTime = document.getElementById('rescheduleTime').value;
+
+            fetch(`/api/appointment/${appointmentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    date: newDate,
+                    time: newTime
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Appointment rescheduled successfully');
+                closeModal();
+                // Refresh appointments list
+                fetch(`/api/appointment/doctor/${doctorId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(appointments => {
+                    const appointmentsContainer = document.getElementById('appointmentsContainer');
+                    appointmentsContainer.innerHTML = '';
+                    if (appointments.length === 0) {
+                        appointmentsContainer.innerHTML = '<p>No upcoming appointments</p>';
+                    } else {
+                        appointments.forEach(appointment => {
+                            const appointmentDiv = document.createElement('div');
+                            appointmentDiv.className = 'appointment';
+                            appointmentDiv.innerHTML = `
+                                <p>Patient: ${appointment.patient.username}</p>
+                                <p>Date: ${appointment.date}</p>
+                                <p>Time: ${appointment.time}</p>
+                                <button class="btn btn-main btn-round-full" onclick="openRescheduleModal('${appointment._id}')">Reschedule</button>
+                            `;
+                            appointmentsContainer.appendChild(appointmentDiv);
+                        });
+                    }
+                });
+            });
+        };
+    };
+
+    window.closeModal = function() {
+        const modal = document.getElementById('rescheduleModal');
+        modal.style.display = 'none';
+    };
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('rescheduleModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+});
+    </script>
+    <style>
+
+        /* Spinner styles */
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1); /* Light gray background */
+    border-left: 4px solid #007bff; /* Blue spinner */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+    display: block;
+}
+
+/* Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        #doctorDashboard {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 30px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-main {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-main:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-round-full {
+            border-radius: 30px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .appointment {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .appointment p {
+            margin: 0;
+        }
+    </style>
+</body>
+</html>

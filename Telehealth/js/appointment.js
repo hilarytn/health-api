@@ -1,7 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
+  
+    const username = localStorage.getItem('username');
     const departmentSelect = document.getElementById('departmentSelect');
     const doctorSelect = document.getElementById('doctorSelect');
     const appointmentForm = document.getElementById('appointmentForm');
+    const patientName =  document.getElementById('name');
+
+    if (username) {
+      // Set the value to the input field
+      document.getElementById('name').value = username;
+  }
   
     // Fetch and populate departments
     fetch('/api/department')
@@ -45,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
       formData.forEach((value, key) => jsonData[key] = value);
 
       const token = localStorage.getItem('token');
+      
 
       fetch('/api/appointment/book', {
           method: 'POST',

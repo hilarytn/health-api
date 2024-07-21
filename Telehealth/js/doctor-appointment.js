@@ -14,8 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function fetchAppointments() {
     const token = localStorage.getItem('token');
+    const doctorId = localStorage.getItem('_id');
 
-    fetch('/api/appointment/', {
+    fetch(`/api/appointment/${doctorId}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

@@ -77,6 +77,19 @@ app.get('/documentation', (req, res) => {
   res.render('documentation');
 });
 
+app.get('/patient/dashboard', (req, res) => {
+  res.render('patient-dashboard');
+});
+
+app.get('/doctor/dashboard', (req, res) => {
+  res.render('doctor-dashboard');
+});
+
+app.get('/signup', (req, res) => {
+  res.render('register');
+});
+
+
 app.get('/service', (req, res) => {
   res.render('service');
 });

@@ -9,7 +9,8 @@ import {
   rescheduleAppointment,
   cancelAppointment,
   getDepartments,
-  getDoctorsByDepartment
+  getDoctorsByDepartment,
+  getAppointmentsByDoctor
 } from '../controllers/appointmentController.js';
 import { protect } from '../middlewares/authMiddleware.js'; 
 
@@ -25,5 +26,6 @@ router.put('/:id/reschedule', protect, rescheduleAppointment);
 router.put('/:id/cancel', protect, cancelAppointment);
 router.get('/departments', getDepartments);
 router.get('/doctors/:departmentId', getDoctorsByDepartment);
+router.get('/doctor/:id', getAppointmentsByDoctor);
 
 export default router;
