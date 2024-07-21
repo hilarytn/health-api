@@ -61,8 +61,8 @@ app.get('/contact', (req, res) => {
   res.render('contact');
 });
 
-app.get('/patient/dashboard', (req, res) => {
-  res.render('clone');
+app.get('/patient', (req, res) => {
+  res.render('patient-dashboard');
 });
 
 app.get('/department', (req, res) => {
@@ -81,7 +81,7 @@ app.get('/documentation', (req, res) => {
   res.render('documentation');
 });
 
-app.get('/patient/dashboard', (req, res) => {
+app.get('/clone', (req, res) => {
   res.render('clone');
 });
 
