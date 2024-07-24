@@ -99,7 +99,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
             localStorage.setItem('role', data.role);
 
             if (data.role == 'user') window.location.href = '/patient-dashboard';
-            else { window.location.href = '/doctor-dashboard';} // Redirect to a dashboard or home page after login
+            else { window.location.href = '/doctor-dashboard';} // Redirect to a dashboard
         } else {
             alert('Login failed: ' + (data.message || 'Unknown error'));
         }
