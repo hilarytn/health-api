@@ -7,6 +7,7 @@ import authRoutes from './api/routes/authRoutes.js';
 import appointmentRoutes from './api/routes/appointmentRoutes.js';
 import departmentRoutes from './api/routes/departmentRoutes.js';
 import doctorRoutes from './api/routes/doctorRoutes.js';
+import prescriptionRoutes from './api/routes/prescriptionRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -27,6 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/appointment', appointmentRoutes);
 app.use('/api/department', departmentRoutes);
 app.use('/api/doctor', doctorRoutes);
+app.use('/api/prescription', prescriptionRoutes);
 
 app.get('/', (req, res) => {
   res.render('index');
@@ -85,8 +87,8 @@ app.get('/clone', (req, res) => {
   res.render('clone');
 });
 
-app.get('/doctor/dashboard', (req, res) => {
-  res.render('doctor-dashboard');
+app.get('/doctor-dashboard', (req, res) => {
+  res.render('doctor-dashboard-2');
 });
 
 app.get('/signup', (req, res) => {
