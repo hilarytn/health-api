@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     dashboardButton.addEventListener('click', function() {
       if (role == 'user') window.location.href = '/patient';
-      else { window.location.href = '/doctor';}
+      else { window.location.href = '/doctor-dashboard';}
     });
   });
   
