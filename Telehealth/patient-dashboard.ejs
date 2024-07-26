@@ -101,7 +101,7 @@
 		</div>
 	</nav>
 </header>
-<h1 style="color: #e12454;">Welcome</h1>
+<h1 id="patient-name" style="color: #e12454;">Welcome</h1>
 <div id="patientDashboard">
     <section id="upcomingAppointments">
         <h2>Upcoming Appointments</h2>
@@ -145,6 +145,31 @@
 document.addEventListener('DOMContentLoaded', function() {
 const token = localStorage.getItem('token');
 const username = localStorage.getItem('username');
+const patientId = localStorage.getItem('_id')
+
+document.getElementById("patient-name").innerHTML = `Welcome, ${username}`;
+
+fetch(`/api/prescription/patient/${patientId}`, {
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
+
+})
+.then(response => response.json())
+.then(prescriptions => {
+    const prescriptionsList = document.getElementById('prescriptionsList');
+    prescriptionsList.innerHTML = '';
+    if (prescriptions.length === 0) {
+        prescriptionsList.innerHTML = '<li>No prescriptions yet</li>';
+    } else {
+        prescriptions.forEach(prescription => {
+            const li = document.createElement('li');
+            li.innerText = `Medication: ${prescription.medication}, Dosage: ${prescription.dosage}, Doctor: 
+            ${prescription.appointment.time}`;
+            prescriptionsList.appendChild(li);
+        });
+    }
+});
 
 document.getElementById('spinner').style.display = 'block';
 // Fetch and display user info
@@ -215,25 +240,7 @@ document.getElementById('spinner').style.display = 'none';
 });
 
 // Fetch and display prescriptions
-fetch('/api/prescriptions', {
-    headers: {
-        'Authorization': `${token}`
-    }
-})
-.then(response => response.json())
-.then(prescriptions => {
-    const prescriptionsList = document.getElementById('prescriptionsList');
-    prescriptionsList.innerHTML = '';
-    if (prescriptions.length === 0) {
-        prescriptionsList.innerHTML = '<li>No prescriptions yet</li>';
-    } else {
-        prescriptions.forEach(prescription => {
-            const li = document.createElement('li');
-            li.innerText = `Medication: ${prescription.medication}, Dosage: ${prescription.dosage}`;
-            prescriptionsList.appendChild(li);
-        });
-    }
-});
+
 
 // Populate department and doctor dropdowns
 fetch('/api/departments')

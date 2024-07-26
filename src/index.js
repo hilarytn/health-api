@@ -8,6 +8,7 @@ import appointmentRoutes from './api/routes/appointmentRoutes.js';
 import departmentRoutes from './api/routes/departmentRoutes.js';
 import doctorRoutes from './api/routes/doctorRoutes.js';
 import prescriptionRoutes from './api/routes/prescriptionRoutes.js';
+import patientRoutes from './api/routes/userRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -29,6 +30,7 @@ app.use('/api/appointment', appointmentRoutes);
 app.use('/api/department', departmentRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/prescription', prescriptionRoutes);
+app.use('/api/patient', patientRoutes);
 
 app.get('/', (req, res) => {
   res.render('index');

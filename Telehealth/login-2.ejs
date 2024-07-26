@@ -197,7 +197,7 @@ fetch('/api/auth/login', {
         localStorage.setItem('_id', data._id);
         localStorage.setItem('role', data.role);
 
-        if (data.role == 'user') window.location.href = '/patient-dashboard';
+        if (data.role == 'user') window.location.href = '/patient';
         else { window.location.href = '/doctor-dashboard';} // Redirect to a dashboard
     } else {
         alert('Login failed: ' + (data.message || 'Unknown error'));

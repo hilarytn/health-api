@@ -5,7 +5,8 @@ import User from '../models/User.js';
 
 const createPrescription = async (req, res) => {
   const { appointmentId, medication, dosage, instructions } = req.body;
-  const doctorId = req.user._id;
+  //const doctorId = req.user._id;
+  const doctorId = req.params.id;
 
   try {
     const appointment = await Appointment.findById(appointmentId).populate('user');
@@ -30,7 +31,8 @@ const createPrescription = async (req, res) => {
 };
 
 const getPrescriptionsByPatient = async (req, res) => {
-    const patientId = req.user._id;
+    //const patientId = req.user._id;
+    const patientId = req.params.id
   
     try {
       const prescriptions = await Prescription.find({ patient: patientId })
@@ -44,7 +46,8 @@ const getPrescriptionsByPatient = async (req, res) => {
   
 
 const getPrescriptionsByDoctor = async (req, res) => {
-    const doctorId = req.user._id;
+    //const doctorId = req.user._id;
+    const doctorId = req.params.id
   
     try {
       const prescriptions = await Prescription.find({ doctor: doctorId })

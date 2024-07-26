@@ -191,7 +191,6 @@ const getAppointmentsByDoctor = async (req, res) => {
 };
 
 
-
 export {
   bookAppointment,
   getAppointments,

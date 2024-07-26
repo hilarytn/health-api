@@ -5,8 +5,8 @@ import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', protect, createPrescription);
-router.get('/patient', protect, getPrescriptionsByPatient);
-router.get('/doctor', protect, getPrescriptionsByDoctor);
+router.post('/:id', createPrescription); //protect all
+router.get('/patient/:id', getPrescriptionsByPatient);
+router.get('/doctor/:id', getPrescriptionsByDoctor);
 
 export default router;
