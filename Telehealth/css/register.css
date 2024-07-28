@@ -2,7 +2,6 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f7f7f7;
-    display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
@@ -17,6 +16,7 @@ body {
     max-width: 400px;
     width: 100%;
     box-sizing: border-box;
+    margin: auto;
 }
 
 h2 {
@@ -42,17 +42,7 @@ h2 {
     box-sizing: border-box;
 }
 
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #e12454;
-    border: none;
-    color: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button:hover {
+register:hover {
     background-color: #223a66;
 }
 

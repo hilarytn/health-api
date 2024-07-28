@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  res.render('login-2');
+  res.render('login');
 });
 
 
@@ -90,7 +90,7 @@ app.get('/clone', (req, res) => {
 });
 
 app.get('/doctor-dashboard', (req, res) => {
-  res.render('doctor-dashboard-2');
+  res.render('doctor-dashboard');
 });
 
 app.get('/signup', (req, res) => {
