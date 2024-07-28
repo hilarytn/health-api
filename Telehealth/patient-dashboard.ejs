@@ -106,7 +106,7 @@
     <section id="upcomingAppointments">
         <h2>Upcoming Appointments</h2>
         <section id="appointmentBooking">
-            <button type="submit" class="btn btn-main btn-round-full">Book Appointment</button>
+            <button type="submit" id="appointment-btn" class="btn btn-main btn-round-full">Book Appointment</button>
         </section>
         <ul id="appointmentsList">
             <!-- Appointments will be populated here -->
@@ -122,32 +122,26 @@
     </section>
     <section id="messages">
         <h2>Messages</h2>
-        <ul id="messagesList">
-            <!-- Messages will be populated here -->
-        </ul>
-    </section>
-
-    <section id="profile">
-        <h2>Profile Information</h2>
-        <p id="profileInfo"></p>
-        <button id="updateProfile" class="btn btn-main btn-round-full">Update Profile</button>
-    </section>
-
-    <section id="medicalHistory">
-        <h2>Medical History</h2>
-        <ul id="medicalHistoryList">
-            <!-- Medical history will be populated here -->
-        </ul>
-        <button id="downloadMedicalHistory" class="btn btn-main btn-round-full">Download Medical History</button>
+        <div id="messagingSystem">
+            <div id="messagesContainer">
+                <!-- Messages will be populated here -->
+            </div>
+        </div>
     </section>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+    document.getElementById('appointment-btn').addEventListener('click', function() {
+    window.location.href = '/appointment';
+});
 const token = localStorage.getItem('token');
 const username = localStorage.getItem('username');
 const patientId = localStorage.getItem('_id')
 
 document.getElementById("patient-name").innerHTML = `Welcome, ${username}`;
+
+
 
 fetch(`/api/prescription/patient/${patientId}`, {
     headers: {
@@ -172,16 +166,6 @@ fetch(`/api/prescription/patient/${patientId}`, {
 });
 
 document.getElementById('spinner').style.display = 'block';
-// Fetch and display user info
-fetch('/api/user/profile', {
-    headers: {
-        'Authorization': `${token}`
-    }
-})
-.then(response => response.json())
-.then(data => {
-    document.querySelector('h1').innerText = `Welcome, ${username}`;
-});
 
 // Fetch and display appointments
 fetch('/api/appointment', {
@@ -266,6 +250,30 @@ fetch('/api/doctors')
         doctorSelect.appendChild(option);
     });
 });
+
+            // Fetch and display messages
+            fetch(`/api/messages/${patientId}`, {
+                headers: {
+                    'Authorization': `${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(messages => {
+                console.log(messages);
+                const messagesContainer = document.getElementById('messagesContainer');
+                messagesContainer.innerHTML = '';
+                messages.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message';
+                    messageDiv.innerHTML = `
+                        <p><strong>From:</strong> ${message.sender.username}</p>
+                        <p><strong>To:</strong> ${message.receiver.username}</p>
+                        <p>${message.content}</p>
+                        <p><em>${new Date(message.createdAt).toLocaleString()}</em></p>
+                    `;
+                    messagesContainer.appendChild(messageDiv);
+                });
+            });
 
 // Handle appointment booking form submission
 document.getElementById('bookingForm').addEventListener('submit', function(event) {

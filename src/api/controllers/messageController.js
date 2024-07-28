@@ -5,7 +5,8 @@ import User from '../models/User.js';
 // Send a message
 export const sendMessage = async (req, res) => {
   const { receiverId, content } = req.body;
-  const senderId = req.user._id;
+  //const senderId = req.user._id;
+  const senderId = req.params.id;
 
   try {
     const message = new Message({
@@ -21,17 +22,39 @@ export const sendMessage = async (req, res) => {
   }
 };
 
+// // Get messages for a user
+// export const getMessages = async (req, res) => {
+//   //const userId = req.user._id;
+//   const userId = req.params.id;
+//   const receiverId = req.params.doctorId;
+
+//   try {
+//     const messages = await Message.find({
+//       $or: [{ sender: userId }, { receiver: receiverId }],
+//     }).populate('sender receiver');
+
+//     res.status(200).json(messages);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 // Get messages for a user
 export const getMessages = async (req, res) => {
-  const userId = req.user._id;
-
-  try {
-    const messages = await Message.find({
-      $or: [{ sender: userId }, { receiver: userId }],
-    }).populate('sender receiver');
-
-    res.status(200).json(messages);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    const userId = req.params.id;
+    const receiverId = req.params.receiverId; // Ensure this is the correct parameter
+  
+    try {
+      const messages = await Message.find({
+        $or: [
+          { sender: userId, receiver: receiverId },
+          { sender: receiverId, receiver: userId }
+        ]
+      }).populate('sender receiver');
+  
+      res.status(200).json(messages);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+  

@@ -5,7 +5,7 @@ import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', protect, sendMessage);
-router.get('/', protect, getMessages);
+router.post('/:id/', protect, sendMessage);
+router.get('/:id/:receiverId', protect, getMessages);
 
 export default router;

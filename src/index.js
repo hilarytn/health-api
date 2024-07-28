@@ -95,6 +95,11 @@ app.get('/doctor-dashboard', (req, res) => {
   res.render('doctor-dashboard');
 });
 
+app.get('/message', (req, res) => {
+  res.render('message');
+});
+
+
 app.get('/signup', (req, res) => {
   res.render('register');
 });
