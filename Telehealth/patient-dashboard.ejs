@@ -20,6 +20,74 @@
 
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+        font-family: 'Open Sans', sans-serif;
+        background-color: #f7f7f7;
+        margin: 0;
+        padding: 0;
+    }
+
+    #messagingSystem {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        color: #007bff;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 30px;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-main {
+        background-color: #e12454;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-main:hover {
+        background-color: #223a66;
+    }
+
+    .btn-round-full {
+        border-radius: 30px;
+    }
+
+    .message {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .message:last-child {
+        border-bottom: none;
+    }
+
+    p {
+        margin: 10px 0;
+    }
+</style>
 
 </head>
 
@@ -122,13 +190,109 @@
     </section>
     <section id="messages">
         <h2>Messages</h2>
-        <div id="messagingSystem">
-            <div id="messagesContainer">
+        <div id="messagesContainer">
                 <!-- Messages will be populated here -->
-            </div>
         </div>
+        <form id="messageForm">
+            <select id="receiverSelect" class="form-control" required>
+                <option value="">Select a Doctor</option>
+                <!-- Users will be populated here -->
+            </select>
+            <textarea id="messageContent" placeholder="Type your message" class="form-control" required></textarea>
+            <button type="submit" class="btn btn-main btn-round-full">Send Message</button>
+        </form>
     </section>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('_id');
+        
+        // Fetch and populate the user dropdown
+        fetch('/api/patient/doctor-all', {
+            headers: {
+                'Authorization': token
+            }
+        })
+        .then(response => response.json())
+        .then(users => {
+            const receiverSelect = document.getElementById('receiverSelect');
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user._id;
+                option.text = user.username;
+                receiverSelect.appendChild(option);
+            });
+        });
+
+        // Handle message form submission
+        document.getElementById('messageForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const receiverId = document.getElementById('receiverSelect').value;
+            const content = document.getElementById('messageContent').value;
+
+            fetch(`/api/messages/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify({
+                    receiverId,
+                    content
+                })
+            })
+            .then(response => response.json())
+            .then(message => {
+                alert('Message sent successfully');
+                document.getElementById('messageContent').value = '';
+                // Optionally, refresh the messages list
+                loadMessages(receiverId);
+            });
+        });
+
+        // Fetch and display messages when a doctor is selected
+        document.getElementById('receiverSelect').addEventListener('change', function() {
+            const receiverId = this.value;
+            if (receiverId) {
+                loadMessages(receiverId);
+            } else {
+                clearMessages();
+            }
+        });
+
+        function loadMessages(receiverId) {
+            fetch(`/api/messages/${userId}/${receiverId}`, {
+                headers: {
+                    'Authorization': token
+                }
+            })
+            .then(response => response.json())
+            .then(messages => {
+                console.log(messages);
+                const messagesContainer = document.getElementById('messagesContainer');
+                messagesContainer.innerHTML = ''; // Clear previous messages
+                messages.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message';
+                    messageDiv.innerHTML = `
+                        <p><strong>From:</strong> ${message.sender.username}</p>
+                        <p><strong>To:</strong> ${message.receiver.username}</p>
+                        <p>${message.content}</p>
+                        <p><em>${new Date(message.createdAt).toLocaleString()}</em></p>
+                    `;
+                    messagesContainer.appendChild(messageDiv);
+                });
+            });
+        }
+
+        function clearMessages() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.innerHTML = ''; // Clear messages if no doctor is selected
+        }
+    });
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -140,8 +304,6 @@ const username = localStorage.getItem('username');
 const patientId = localStorage.getItem('_id')
 
 document.getElementById("patient-name").innerHTML = `Welcome, ${username}`;
-
-
 
 fetch(`/api/prescription/patient/${patientId}`, {
     headers: {
@@ -250,30 +412,6 @@ fetch('/api/doctors')
         doctorSelect.appendChild(option);
     });
 });
-
-            // Fetch and display messages
-            fetch(`/api/messages/${patientId}`, {
-                headers: {
-                    'Authorization': `${token}`
-                }
-            })
-            .then(response => response.json())
-            .then(messages => {
-                console.log(messages);
-                const messagesContainer = document.getElementById('messagesContainer');
-                messagesContainer.innerHTML = '';
-                messages.forEach(message => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = 'message';
-                    messageDiv.innerHTML = `
-                        <p><strong>From:</strong> ${message.sender.username}</p>
-                        <p><strong>To:</strong> ${message.receiver.username}</p>
-                        <p>${message.content}</p>
-                        <p><em>${new Date(message.createdAt).toLocaleString()}</em></p>
-                    `;
-                    messagesContainer.appendChild(messageDiv);
-                });
-            });
 
 // Handle appointment booking form submission
 document.getElementById('bookingForm').addEventListener('submit', function(event) {

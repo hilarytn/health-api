@@ -26,7 +26,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             const userId = localStorage.getItem('_id');
-
+            
             // Fetch and populate the user dropdown
             fetch('/api/patient/doctor-all', {
                 headers: {

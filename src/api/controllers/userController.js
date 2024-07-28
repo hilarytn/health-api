@@ -19,4 +19,17 @@ const getAllDoctors = async (req, res) => {
   }
 };
 
+export const getPatientsByDoctor = async (req, res) => {
+  const doctorId = req.params.doctorId;
+
+  try {
+    const appointments = await Appointment.find({ doctor: doctorId }).populate('patient');
+    const patients = appointments.map(appointment => appointment.patient);
+
+    res.status(200).json(patients);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export { getAllUsers, getAllDoctors };
