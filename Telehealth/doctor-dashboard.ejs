@@ -132,18 +132,19 @@
             <!-- Prescriptions will be populated here -->
         </ul>
     </section>
-
-    <section id="profile">
-        <h2>Profile Information</h2>
-        <p id="profileInfo"></p>
-        <button id="updateProfile" class="btn btn-main btn-round-full">Update Profile</button>
-    </section>
-
     <section id="messages">
         <h2>Messages</h2>
-        <ul id="messagesList">
+        <div id="messagesContainer">
             <!-- Messages will be populated here -->
-        </ul>
+        </div>
+        <form id="messageForm">
+            <select id="receiverSelect" class="form-control" required>
+            <option value="">Select a Patient</option>
+            <!-- Users will be populated here -->
+            </select>
+            <textarea id="messageContent" placeholder="Type your message" class="form-control" required></textarea>
+            <button type="submit" class="btn btn-main btn-round-full">Send Message</button>
+        </form>
     </section>
 </div>
 
@@ -161,6 +162,97 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('_id');
+    
+    // Fetch and populate the user dropdown
+    fetch(`/api/patient/${userId}/patient-all`, {
+        headers: {
+            'Authorization': token
+        }
+    })
+    .then(response => response.json())
+    .then(users => {
+        const receiverSelect = document.getElementById('receiverSelect');
+        users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user._id;
+            option.text = user.username;
+            receiverSelect.appendChild(option);
+        });
+    });
+
+    // Handle message form submission
+    document.getElementById('messageForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const receiverId = document.getElementById('receiverSelect').value;
+        const content = document.getElementById('messageContent').value;
+
+        fetch(`/api/messages/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify({
+                receiverId,
+                content
+            })
+        })
+        .then(response => response.json())
+        .then(message => {
+            alert('Message sent successfully');
+            document.getElementById('messageContent').value = '';
+            // Optionally, refresh the messages list
+            loadMessages(receiverId);
+        });
+    });
+
+    // Fetch and display messages when a doctor is selected
+    document.getElementById('receiverSelect').addEventListener('change', function() {
+        const receiverId = this.value;
+        if (receiverId) {
+            loadMessages(receiverId);
+        } else {
+            clearMessages();
+        }
+    });
+
+    function loadMessages(receiverId) {
+        fetch(`/api/messages/${userId}/${receiverId}`, {
+            headers: {
+                'Authorization': token
+            }
+        })
+        .then(response => response.json())
+        .then(messages => {
+            console.log(messages);
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.innerHTML = ''; // Clear previous messages
+            messages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                messageDiv.innerHTML = `
+                    <p><strong>From:</strong> ${message.sender.username}</p>
+                    <p><strong>To:</strong> ${message.receiver.username}</p>
+                    <p>${message.content}</p>
+                    <p><em>${new Date(message.createdAt).toLocaleString()}</em></p>
+                `;
+                messagesContainer.appendChild(messageDiv);
+            });
+        });
+    }
+
+    function clearMessages() {
+        const messagesContainer = document.getElementById('messagesContainer');
+        messagesContainer.innerHTML = ''; // Clear messages if no doctor is selected
+    }
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -246,7 +338,7 @@ fetch(`/api/prescription/doctor/${doctorId}`, {
 });
 
 // Populate patient dropdown
-fetch('/api/patient', {
+fetch(`/api/patient/${doctorId}/patient-all`, {
     headers: {
         'Authorization': `Bearer ${token}`
     }
@@ -346,7 +438,7 @@ window.openRescheduleModal = function(appointmentId) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': token
             },
             body: JSON.stringify({
                 date: newDate,
@@ -357,32 +449,34 @@ window.openRescheduleModal = function(appointmentId) {
         .then(data => {
             alert('Appointment rescheduled successfully');
             closeModal();
+
+            window.location.href = '/doctor-dashboard'
             // Refresh appointments list
-            fetch(`/api/appointment/doctor/${doctorId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(response => response.json())
-            .then(appointments => {
-                const appointmentsContainer = document.getElementById('appointmentsContainer');
-                appointmentsContainer.innerHTML = '';
-                if (appointments.length === 0) {
-                    appointmentsContainer.innerHTML = '<p>No upcoming appointments</p>';
-                } else {
-                    appointments.forEach(appointment => {
-                        const appointmentDiv = document.createElement('div');
-                        appointmentDiv.className = 'appointment';
-                        appointmentDiv.innerHTML = `
-                            <p>Patient: ${appointment.patient.username}</p>
-                            <p>Date: ${appointment.date}</p>
-                            <p>Time: ${appointment.time}</p>
-                            <button class="btn btn-main btn-round-full" onclick="openRescheduleModal('${appointment._id}')">Reschedule</button>
-                        `;
-                        appointmentsContainer.appendChild(appointmentDiv);
-                    });
-                }
-            });
+            // fetch(`/api/appointment/doctor/${doctorId}`, {
+            //     headers: {
+            //         'Authorization': token
+            //     }
+            // })
+            // .then(response => response.json())
+            // .then(appointments => {
+            //     const appointmentsContainer = document.getElementById('appointmentsContainer');
+            //     appointmentsContainer.innerHTML = '';
+            //     if (appointments.length === 0) {
+            //         appointmentsContainer.innerHTML = '<p>No upcoming appointments</p>';
+            //     } else {
+            //         appointments.forEach(appointment => {
+            //             const appointmentDiv = document.createElement('div');
+            //             appointmentDiv.className = 'appointment';
+            //             appointmentDiv.innerHTML = `
+            //                 <p>Patient: ${appointment.patient.username}</p>
+            //                 <p>Date: ${appointment.date}</p>
+            //                 <p>Time: ${appointment.time}</p>
+            //                 <button class="btn btn-main btn-round-full" onclick="openRescheduleModal('${appointment._id}')">Reschedule</button>
+            //             `;
+            //             appointmentsContainer.appendChild(appointmentDiv);
+            //         });
+            //     }
+            // });
         });
     };
 };

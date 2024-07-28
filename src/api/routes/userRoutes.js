@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get('/', getAllUsers);
 router.get('/doctor-all', getAllDoctors)
-router.get('/patient-all', getPatientsByDoctor)
+router.get('/:doctorId/patient-all', getPatientsByDoctor)
 
 export default router;
